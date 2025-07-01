@@ -501,6 +501,7 @@
                 <div>Pipes: <span id="pipeCount">0</span></div>
                 <div>Pipe Speed: <span id="pipeSpeedDisplay">0</span></div>
                 <div>Pipe Gap: <span id="pipeGapDisplay">0</span>px</div>
+                <div>Weather: <span id="weatherStatus">None</span></div>
             </div>
         </div>
 
@@ -589,6 +590,8 @@
         let weatherParticles = [];
         let gameStartTime = 0;
         let lastEnvironmentUpdate = 0;
+        let weatherTimeout = null; // Track weather timeout
+        let weatherCooldown = false; // Prevent overlapping weather events
 
         // Seasons and times of day
         const seasons = ['spring', 'summer', 'autumn', 'winter'];
@@ -617,6 +620,7 @@
         // Timing constants
         const DAY_NIGHT_CYCLE_TIME = 30000; // 30 seconds per time period (2 minutes for full cycle)
         const SEASON_CHANGE_INTERVAL = 100; // Change season every 100 points
+        const WEATHER_COOLDOWN_TIME = 5000; // 5 seconds minimum between weather events
 
         // Pipe dimensions - exact sizes for hitboxes
         const PIPE_WIDTH = 80;
@@ -666,6 +670,7 @@
             document.getElementById('pipeCount').textContent = pipes.length;
             document.getElementById('pipeSpeedDisplay').textContent = pipeSpeed.toFixed(4);
             document.getElementById('pipeGapDisplay').textContent = pipeGap;
+            document.getElementById('weatherStatus').textContent = isWeatherActive ? weatherType : 'None';
         }
 
         // Bird rotation based on velocity - more gradual
@@ -724,7 +729,8 @@
                     environmentInfo.textContent = `${timeEmoji} ${seasonName} ${timeName}`;
                     
                     // Trigger weather event on time change (not just season change)
-                    if (Math.random() < 0.5) { // 50% chance of weather on any environment change
+                    // Only if not on cooldown and no weather active
+                    if (!weatherCooldown && !isWeatherActive && Math.random() < 0.5) {
                         startWeatherEvent();
                     }
                 }
@@ -733,7 +739,8 @@
 
         // Start weather event
         function startWeatherEvent() {
-            if (isWeatherActive) return;
+            // Prevent starting if already active or on cooldown
+            if (isWeatherActive || weatherCooldown) return;
             
             let possibleWeather = weatherTypes[currentSeason];
             weatherType = possibleWeather[Math.floor(Math.random() * possibleWeather.length)];
@@ -741,20 +748,33 @@
             if (weatherType === 'clear') return;
             
             isWeatherActive = true;
+            weatherCooldown = true;
             
-            // Create weather particles
-            for (let i = 0; i < 30; i++) {
-                setTimeout(() => createWeatherParticle(), i * 100);
+            // Stop any existing weather particles creation
+            clearTimeout(weatherTimeout);
+            
+            // Create initial batch of weather particles
+            for (let i = 0; i < 20; i++) { // Reduced from 30 to 20
+                setTimeout(() => createWeatherParticle(), i * 150); // Increased spacing
             }
             
             // Stop weather after 10-20 seconds
-            setTimeout(stopWeatherEvent, 10000 + Math.random() * 10000);
+            weatherTimeout = setTimeout(stopWeatherEvent, 10000 + Math.random() * 10000);
         }
 
         // Stop weather event
         function stopWeatherEvent() {
             isWeatherActive = false;
             weatherType = null;
+            
+            // Clear the weather timeout
+            clearTimeout(weatherTimeout);
+            weatherTimeout = null;
+            
+            // Set cooldown period before next weather event
+            setTimeout(() => {
+                weatherCooldown = false;
+            }, WEATHER_COOLDOWN_TIME);
         }
 
         // Create weather particle
@@ -802,9 +822,9 @@
                 weatherParticles = weatherParticles.filter(p => p !== particle);
             });
             
-            // Create more particles while weather is active
-            if (isWeatherActive) {
-                setTimeout(createWeatherParticle, 200 + Math.random() * 800);
+            // Create more particles while weather is active (with controlled rate)
+            if (isWeatherActive && weatherParticles.length < 50) { // Limit total particles
+                setTimeout(createWeatherParticle, 300 + Math.random() * 700); // Increased delay
             }
         }
 
@@ -1047,6 +1067,12 @@
             currentTimeOfDay = 'day';
             gameContainer.className = 'day summer';
             environmentInfo.textContent = '☀️ Summer Day';
+            
+            // Reset weather system
+            isWeatherActive = false;
+            weatherCooldown = false;
+            weatherType = null;
+            clearTimeout(weatherTimeout);
             
             animationId = requestAnimationFrame(gameLoop);
         }
