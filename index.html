@@ -81,6 +81,39 @@
             background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 80%, #3d4a5c 80%, #3d4a5c 100%);
         }
 
+        /* Dawn/Dusk variants for seasons */
+        #gameContainer.dawn.spring {
+            background: linear-gradient(to bottom, #FFB347 0%, #FFB347 80%, #90EE90 80%, #90EE90 100%);
+        }
+
+        #gameContainer.dawn.summer {
+            background: linear-gradient(to bottom, #FFB347 0%, #FFB347 80%, #98D98E 80%, #98D98E 100%);
+        }
+
+        #gameContainer.dawn.autumn {
+            background: linear-gradient(to bottom, #FFB347 0%, #FFB347 80%, #D2691E 80%, #D2691E 100%);
+        }
+
+        #gameContainer.dawn.winter {
+            background: linear-gradient(to bottom, #FFB347 0%, #FFB347 80%, #F0F8FF 80%, #F0F8FF 100%);
+        }
+
+        #gameContainer.dusk.spring {
+            background: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 80%, #90EE90 80%, #90EE90 100%);
+        }
+
+        #gameContainer.dusk.summer {
+            background: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 80%, #556B2F 80%, #556B2F 100%);
+        }
+
+        #gameContainer.dusk.autumn {
+            background: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 80%, #D2691E 80%, #D2691E 100%);
+        }
+
+        #gameContainer.dusk.winter {
+            background: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 80%, #F0F8FF 80%, #F0F8FF 100%);
+        }
+
         #bird {
             position: absolute;
             font-size: 50px;
@@ -554,6 +587,8 @@
         let isWeatherActive = false;
         let weatherType = null;
         let weatherParticles = [];
+        let gameStartTime = 0;
+        let lastEnvironmentUpdate = 0;
 
         // Seasons and times of day
         const seasons = ['spring', 'summer', 'autumn', 'winter'];
@@ -578,6 +613,10 @@
             dusk: '🌆',
             night: '🌙'
         };
+
+        // Timing constants
+        const DAY_NIGHT_CYCLE_TIME = 30000; // 30 seconds per time period (2 minutes for full cycle)
+        const SEASON_CHANGE_INTERVAL = 100; // Change season every 100 points
 
         // Pipe dimensions - exact sizes for hitboxes
         const PIPE_WIDTH = 80;
@@ -647,35 +686,47 @@
             bird.style.transform = `scaleX(-1) rotate(${rotation}deg)`;
         }
 
-        // Update environment based on score
-        function updateEnvironment() {
-            // Day/Night cycle every 50 points
-            let dayNightCycle = Math.floor(score / 50) % 4;
+        // Update environment based on time and score
+        function updateEnvironment(currentTime) {
+            // Time-based day/night cycle
+            let timeSinceStart = currentTime - gameStartTime;
+            let dayNightCycle = Math.floor(timeSinceStart / DAY_NIGHT_CYCLE_TIME) % 4;
             let newTimeOfDay = timesOfDay[dayNightCycle];
             
-            // Season change every 100 points
-            let seasonCycle = Math.floor(score / 100) % 4;
+            // Score-based season change
+            let seasonCycle = Math.floor(score / SEASON_CHANGE_INTERVAL) % 4;
             let newSeason = seasons[seasonCycle];
             
             // Update if changed
             if (newTimeOfDay !== currentTimeOfDay || newSeason !== currentSeason) {
-                currentTimeOfDay = newTimeOfDay;
-                currentSeason = newSeason;
+                let environmentChanged = false;
                 
-                // Update classes
-                gameContainer.className = `${currentTimeOfDay} ${currentSeason}`;
+                if (newTimeOfDay !== currentTimeOfDay) {
+                    currentTimeOfDay = newTimeOfDay;
+                    environmentChanged = true;
+                }
                 
-                // Update info display
-                let timeEmoji = timeEmojis[currentTimeOfDay];
-                let seasonEmoji = seasonEmojis[currentSeason];
-                let seasonName = currentSeason.charAt(0).toUpperCase() + currentSeason.slice(1);
-                let timeName = currentTimeOfDay.charAt(0).toUpperCase() + currentTimeOfDay.slice(1);
+                if (newSeason !== currentSeason) {
+                    currentSeason = newSeason;
+                    environmentChanged = true;
+                }
                 
-                environmentInfo.textContent = `${timeEmoji} ${seasonName} ${timeName}`;
-                
-                // Trigger weather event on environment change
-                if (Math.random() < 0.7) { // 70% chance of weather
-                    startWeatherEvent();
+                if (environmentChanged) {
+                    // Update classes
+                    gameContainer.className = `${currentTimeOfDay} ${currentSeason}`;
+                    
+                    // Update info display
+                    let timeEmoji = timeEmojis[currentTimeOfDay];
+                    let seasonEmoji = seasonEmojis[currentSeason];
+                    let seasonName = currentSeason.charAt(0).toUpperCase() + currentSeason.slice(1);
+                    let timeName = currentTimeOfDay.charAt(0).toUpperCase() + currentTimeOfDay.slice(1);
+                    
+                    environmentInfo.textContent = `${timeEmoji} ${seasonName} ${timeName}`;
+                    
+                    // Trigger weather event on time change (not just season change)
+                    if (Math.random() < 0.5) { // 50% chance of weather on any environment change
+                        startWeatherEvent();
+                    }
                 }
             }
         }
@@ -932,6 +983,9 @@
             bird.style.top = birdY + 'px';
             updateBirdRotation();
             
+            // Update environment based on time
+            updateEnvironment(currentTime);
+            
             if (currentTime - lastPipeTime > pipeInterval) {
                 createPipe();
                 lastPipeTime = currentTime;
@@ -946,7 +1000,8 @@
                     pipe.passed = true;
                     score++;
                     scoreElement.textContent = score;
-                    updateEnvironment();
+                    // Season might change on score update
+                    updateEnvironment(currentTime);
                 }
                 
                 if (pipe.x < -PIPE_CAP_WIDTH) {
@@ -981,7 +1036,11 @@
             score = 0;
             scoreElement.textContent = score;
             bird.style.top = birdY + 'px';
-            lastPipeTime = performance.now();
+            
+            // Initialize time tracking
+            gameStartTime = performance.now();
+            lastPipeTime = gameStartTime;
+            lastEnvironmentUpdate = gameStartTime;
             
             // Reset environment
             currentSeason = 'summer';
