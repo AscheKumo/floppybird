@@ -27,15 +27,122 @@
             background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #98D98E 80%, #98D98E 100%);
             overflow: hidden;
             cursor: pointer;
+            transition: background 2s ease-in-out;
+        }
+
+        /* Day/Night backgrounds */
+        #gameContainer.day {
+            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #98D98E 80%, #98D98E 100%);
+        }
+
+        #gameContainer.dawn {
+            background: linear-gradient(to bottom, #FFB347 0%, #FFB347 80%, #98D98E 80%, #98D98E 100%);
+        }
+
+        #gameContainer.dusk {
+            background: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 80%, #556B2F 80%, #556B2F 100%);
+        }
+
+        #gameContainer.night {
+            background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 80%, #2C3E50 80%, #2C3E50 100%);
+        }
+
+        /* Seasonal ground colors */
+        #gameContainer.spring {
+            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #90EE90 80%, #90EE90 100%);
+        }
+
+        #gameContainer.summer {
+            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #98D98E 80%, #98D98E 100%);
+        }
+
+        #gameContainer.autumn {
+            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #D2691E 80%, #D2691E 100%);
+        }
+
+        #gameContainer.winter {
+            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #F0F8FF 80%, #F0F8FF 100%);
+        }
+
+        /* Night variants for seasons */
+        #gameContainer.night.spring {
+            background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 80%, #2d4a2b 80%, #2d4a2b 100%);
+        }
+
+        #gameContainer.night.summer {
+            background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 80%, #2C3E50 80%, #2C3E50 100%);
+        }
+
+        #gameContainer.night.autumn {
+            background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 80%, #4a2c2a 80%, #4a2c2a 100%);
+        }
+
+        #gameContainer.night.winter {
+            background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 80%, #3d4a5c 80%, #3d4a5c 100%);
         }
 
         #bird {
             position: absolute;
             font-size: 50px;
             left: 15%;
-            transition: transform 0.15s ease-out; /* Smoothed rotation transition */
+            transition: transform 0.1s linear; /* Changed to linear for direct correlation */
             user-select: none;
             transform: scaleX(-1); /* Flip the bird to face right */
+        }
+
+        /* Weather effects */
+        .weather-particle {
+            position: absolute;
+            user-select: none;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .raindrop {
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, transparent, #4FC3F7);
+            animation: fall 1s linear infinite;
+        }
+
+        .snowflake {
+            font-size: 20px;
+            color: white;
+            animation: snowfall 3s linear infinite;
+        }
+
+        .leaf {
+            font-size: 25px;
+            animation: leaffall 4s ease-in-out infinite;
+        }
+
+        .flower {
+            font-size: 20px;
+            animation: flowerfall 5s ease-in-out infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        @keyframes snowfall {
+            to {
+                transform: translateY(100vh) translateX(50px) rotate(360deg);
+            }
+        }
+
+        @keyframes leaffall {
+            to {
+                transform: translateY(100vh) translateX(100px) rotate(720deg);
+            }
+        }
+
+        @keyframes flowerfall {
+            to {
+                transform: translateY(100vh) translateX(-50px) rotate(-360deg);
+            }
         }
 
         /* New pipe styles - direct elements instead of CSS pseudo-elements */
@@ -75,6 +182,18 @@
             font-weight: bold;
             color: white;
             text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            z-index: 100;
+            user-select: none;
+        }
+
+        #environmentInfo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 100;
             user-select: none;
         }
@@ -166,6 +285,11 @@
             font-size: 60px;
             opacity: 0.6;
             user-select: none;
+            transition: opacity 2s ease-in-out;
+        }
+
+        .night .cloud {
+            opacity: 0.3;
         }
 
         #cloud1 {
@@ -192,6 +316,25 @@
             to {
                 left: -15%;
             }
+        }
+
+        /* Stars for night */
+        .star {
+            position: absolute;
+            color: white;
+            font-size: 10px;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        .night .star {
+            opacity: 1;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
         }
 
         /* Developer Options Menu */
@@ -305,7 +448,7 @@
     </style>
 </head>
 <body>
-    <div id="gameContainer">
+    <div id="gameContainer" class="day summer">
         <button id="devMenuToggle" onclick="toggleDevMenu()">⚙️ Dev</button>
         
         <div id="devMenu">
@@ -324,8 +467,21 @@
                 <div>Rotation: <span id="birdRotation">0</span>°</div>
                 <div>Pipes: <span id="pipeCount">0</span></div>
                 <div>Pipe Speed: <span id="pipeSpeedDisplay">0</span></div>
+                <div>Pipe Gap: <span id="pipeGapDisplay">0</span>px</div>
             </div>
         </div>
+
+        <div id="environmentInfo">☀️ Summer Day</div>
+        
+        <!-- Stars for night time -->
+        <div class="star" style="top: 20%; left: 10%;">✦</div>
+        <div class="star" style="top: 30%; left: 25%;">✦</div>
+        <div class="star" style="top: 15%; left: 40%;">✦</div>
+        <div class="star" style="top: 25%; left: 60%;">✦</div>
+        <div class="star" style="top: 35%; left: 75%;">✦</div>
+        <div class="star" style="top: 10%; left: 85%;">✦</div>
+        <div class="star" style="top: 40%; left: 50%;">✦</div>
+        <div class="star" style="top: 20%; left: 90%;">✦</div>
 
         <div id="cloud1" class="cloud">☁️</div>
         <div id="cloud2" class="cloud">☁️</div>
@@ -357,6 +513,7 @@
         let startScreen = document.getElementById('startScreen');
         let finalScoreElement = document.getElementById('finalScore');
         let bestScoreElement = document.getElementById('bestScore');
+        let environmentInfo = document.getElementById('environmentInfo');
 
         // Developer menu elements
         let devMenu = document.getElementById('devMenu');
@@ -375,32 +532,63 @@
         // Bird physics - adjusted for higher arc flapping
         let birdY = containerHeight / 2;
         let velocity = 0;
-        let gravity = 0.3; // Slightly increased from 0.25 for more pronounced arc
-        let jumpPower = -7.5; // Increased from -6 for higher jumps
-        let maxVelocity = 8; // Cap the falling speed
-        let currentRotation = 0; // Track current rotation for dev stats
+        let gravity = 0.2; // Reduced from 0.3 for more floaty feel
+        let jumpPower = -5; // Reduced from -7.5 for more gradual acceleration
+        let maxVelocity = 8;
+        let currentRotation = 0;
         
         // Game variables
         let score = 0;
-        let bestScore = localStorage.getItem('floppyBirdBestScore') || 0; // Changed localStorage key
+        let bestScore = localStorage.getItem('floppyBirdBestScore') || 0;
         let gameRunning = false;
         let pipes = [];
-        let pipeGap = containerHeight * 0.25; // Increased from 0.22 (added ~10px to gap)
-        let pipeSpeed = containerWidth * 0.0045; // Increased from 0.003 to 0.0045 (50% faster)
-        let pipeInterval = 3000; // Reduced from 3500 to compensate for faster movement
+        let pipeGap = 165;
+        let pipeSpeed = containerWidth * 0.0045;
+        let pipeInterval = 3000;
         let lastPipeTime = 0;
         let animationId;
+
+        // Environment variables
+        let currentSeason = 'summer';
+        let currentTimeOfDay = 'day';
+        let isWeatherActive = false;
+        let weatherType = null;
+        let weatherParticles = [];
+
+        // Seasons and times of day
+        const seasons = ['spring', 'summer', 'autumn', 'winter'];
+        const timesOfDay = ['dawn', 'day', 'dusk', 'night'];
+        const weatherTypes = {
+            spring: ['rain', 'flowers'],
+            summer: ['clear', 'rain'],
+            autumn: ['leaves', 'rain'],
+            winter: ['snow', 'clear']
+        };
+
+        const seasonEmojis = {
+            spring: '🌸',
+            summer: '☀️',
+            autumn: '🍂',
+            winter: '❄️'
+        };
+
+        const timeEmojis = {
+            dawn: '🌅',
+            day: '☀️',
+            dusk: '🌆',
+            night: '🌙'
+        };
 
         // Pipe dimensions - exact sizes for hitboxes
         const PIPE_WIDTH = 80;
         const PIPE_CAP_WIDTH = 100;
         const PIPE_CAP_HEIGHT = 40;
-        const PIPE_CAP_OFFSET = (PIPE_CAP_WIDTH - PIPE_WIDTH) / 2; // 10px on each side
+        const PIPE_CAP_OFFSET = (PIPE_CAP_WIDTH - PIPE_WIDTH) / 2;
 
         // Bird hitbox offset - moved 8px down and 8px right
         const BIRD_HITBOX_OFFSET_X = 8;
         const BIRD_HITBOX_OFFSET_Y = 8;
-        const BIRD_RADIUS = 22.5; // Half of 45px for circular hitbox
+        const BIRD_RADIUS = 22.5;
 
         // Initialize best score display
         bestScoreElement.textContent = bestScore;
@@ -438,45 +626,154 @@
             document.getElementById('birdRotation').textContent = Math.round(currentRotation);
             document.getElementById('pipeCount').textContent = pipes.length;
             document.getElementById('pipeSpeedDisplay').textContent = pipeSpeed.toFixed(4);
+            document.getElementById('pipeGapDisplay').textContent = pipeGap;
         }
 
-        // Bird rotation based on velocity - extreme 150-degree range
+        // Bird rotation based on velocity - more gradual
         function updateBirdRotation() {
-            // Much more dramatic rotation with extreme range
-            let rotation = velocity * -10; // Significantly increased multiplier
+            // More gradual rotation based on velocity
+            // Scale down the velocity impact for smoother rotation
+            let normalizedVelocity = velocity / maxVelocity;
             
-            // Apply exponential scaling for more extreme rotations at high velocities
-            if (velocity > 4) {
-                rotation = rotation * 1.2; // Extra boost when falling fast
-            } else if (velocity < -4) {
-                rotation = rotation * 1.2; // Extra boost when rising fast
-            }
+            // Apply a smoother curve to the rotation
+            // Use a power function to make the rotation more gradual
+            let rotationFactor = Math.sign(normalizedVelocity) * Math.pow(Math.abs(normalizedVelocity), 0.7);
+            let rotation = -rotationFactor * 60; // Reduced from 80 to 60 for less extreme angles
             
-            // Apply smoothing in the middle range
-            if (Math.abs(velocity) < 2) {
-                rotation = rotation * 0.8; // Slight smoothing for small velocities
-            }
+            // Clamp rotation to desired range
+            rotation = Math.max(-50, Math.min(60, rotation)); // Reduced range for more control
             
-            // Allow almost full 150-degree range: from -70° (pointing up) to 80° (pointing down)
-            rotation = Math.max(-70, Math.min(80, rotation));
-            
-            currentRotation = rotation; // Store for dev stats
+            currentRotation = rotation;
             bird.style.transform = `scaleX(-1) rotate(${rotation}deg)`;
+        }
+
+        // Update environment based on score
+        function updateEnvironment() {
+            // Day/Night cycle every 50 points
+            let dayNightCycle = Math.floor(score / 50) % 4;
+            let newTimeOfDay = timesOfDay[dayNightCycle];
+            
+            // Season change every 100 points
+            let seasonCycle = Math.floor(score / 100) % 4;
+            let newSeason = seasons[seasonCycle];
+            
+            // Update if changed
+            if (newTimeOfDay !== currentTimeOfDay || newSeason !== currentSeason) {
+                currentTimeOfDay = newTimeOfDay;
+                currentSeason = newSeason;
+                
+                // Update classes
+                gameContainer.className = `${currentTimeOfDay} ${currentSeason}`;
+                
+                // Update info display
+                let timeEmoji = timeEmojis[currentTimeOfDay];
+                let seasonEmoji = seasonEmojis[currentSeason];
+                let seasonName = currentSeason.charAt(0).toUpperCase() + currentSeason.slice(1);
+                let timeName = currentTimeOfDay.charAt(0).toUpperCase() + currentTimeOfDay.slice(1);
+                
+                environmentInfo.textContent = `${timeEmoji} ${seasonName} ${timeName}`;
+                
+                // Trigger weather event on environment change
+                if (Math.random() < 0.7) { // 70% chance of weather
+                    startWeatherEvent();
+                }
+            }
+        }
+
+        // Start weather event
+        function startWeatherEvent() {
+            if (isWeatherActive) return;
+            
+            let possibleWeather = weatherTypes[currentSeason];
+            weatherType = possibleWeather[Math.floor(Math.random() * possibleWeather.length)];
+            
+            if (weatherType === 'clear') return;
+            
+            isWeatherActive = true;
+            
+            // Create weather particles
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => createWeatherParticle(), i * 100);
+            }
+            
+            // Stop weather after 10-20 seconds
+            setTimeout(stopWeatherEvent, 10000 + Math.random() * 10000);
+        }
+
+        // Stop weather event
+        function stopWeatherEvent() {
+            isWeatherActive = false;
+            weatherType = null;
+        }
+
+        // Create weather particle
+        function createWeatherParticle() {
+            if (!isWeatherActive) return;
+            
+            let particle = document.createElement('div');
+            particle.className = 'weather-particle';
+            
+            switch (weatherType) {
+                case 'rain':
+                    particle.className += ' raindrop';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDuration = (0.5 + Math.random() * 0.5) + 's';
+                    break;
+                    
+                case 'snow':
+                    particle.className += ' snowflake';
+                    particle.innerHTML = '❄️';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDuration = (2 + Math.random() * 2) + 's';
+                    break;
+                    
+                case 'leaves':
+                    particle.className += ' leaf';
+                    particle.innerHTML = ['🍁', '🍂', '🍃'][Math.floor(Math.random() * 3)];
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDuration = (3 + Math.random() * 2) + 's';
+                    break;
+                    
+                case 'flowers':
+                    particle.className += ' flower';
+                    particle.innerHTML = ['🌸', '🌼', '🌺'][Math.floor(Math.random() * 3)];
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDuration = (4 + Math.random() * 2) + 's';
+                    break;
+            }
+            
+            gameContainer.appendChild(particle);
+            weatherParticles.push(particle);
+            
+            // Remove particle after animation
+            particle.addEventListener('animationend', () => {
+                particle.remove();
+                weatherParticles = weatherParticles.filter(p => p !== particle);
+            });
+            
+            // Create more particles while weather is active
+            if (isWeatherActive) {
+                setTimeout(createWeatherParticle, 200 + Math.random() * 800);
+            }
         }
 
         // Create pipe with visual elements matching hitboxes exactly
         function createPipe() {
-            let minHeight = containerHeight * 0.15;
-            let maxHeight = containerHeight * 0.52; // Adjusted to accommodate larger gap
-            let pipeHeight = Math.random() * (maxHeight - minHeight) + minHeight;
+            let minTopHeight = 100;
+            let minBottomHeight = 100;
+            let maxTopHeight = containerHeight - pipeGap - minBottomHeight;
             
-            // Create pipe container
+            if (maxTopHeight <= minTopHeight) {
+                maxTopHeight = containerHeight * 0.5;
+            }
+            
+            let pipeHeight = Math.random() * (maxTopHeight - minTopHeight) + minTopHeight;
+            
             let pipeContainer = document.createElement('div');
             pipeContainer.style.position = 'absolute';
             pipeContainer.style.left = containerWidth + 'px';
             
             // TOP PIPE
-            // Top pipe body
             let topPipeBody = document.createElement('div');
             topPipeBody.className = 'pipe-body';
             topPipeBody.style.width = PIPE_WIDTH + 'px';
@@ -484,7 +781,6 @@
             topPipeBody.style.left = '0px';
             topPipeBody.style.top = '0px';
             
-            // Top pipe cap
             let topPipeCap = document.createElement('div');
             topPipeCap.className = 'pipe-cap';
             topPipeCap.style.width = PIPE_CAP_WIDTH + 'px';
@@ -496,7 +792,6 @@
             let bottomPipeY = pipeHeight + pipeGap;
             let bottomPipeHeight = containerHeight - bottomPipeY;
             
-            // Bottom pipe body
             let bottomPipeBody = document.createElement('div');
             bottomPipeBody.className = 'pipe-body';
             bottomPipeBody.style.width = PIPE_WIDTH + 'px';
@@ -504,7 +799,6 @@
             bottomPipeBody.style.left = '0px';
             bottomPipeBody.style.top = bottomPipeY + 'px';
             
-            // Bottom pipe cap
             let bottomPipeCap = document.createElement('div');
             bottomPipeCap.className = 'pipe-cap';
             bottomPipeCap.style.width = PIPE_CAP_WIDTH + 'px';
@@ -512,7 +806,6 @@
             bottomPipeCap.style.left = -PIPE_CAP_OFFSET + 'px';
             bottomPipeCap.style.top = bottomPipeY + 'px';
             
-            // Add all elements to container
             pipeContainer.appendChild(topPipeBody);
             pipeContainer.appendChild(topPipeCap);
             pipeContainer.appendChild(bottomPipeBody);
@@ -530,33 +823,26 @@
 
         // Helper function for circle-rectangle collision
         function circleRectCollision(circleX, circleY, radius, rectX, rectY, rectWidth, rectHeight) {
-            // Find the closest point to the circle within the rectangle
             let closestX = Math.max(rectX, Math.min(circleX, rectX + rectWidth));
             let closestY = Math.max(rectY, Math.min(circleY, rectY + rectHeight));
             
-            // Calculate the distance between the circle's center and this closest point
             let distanceX = circleX - closestX;
             let distanceY = circleY - closestY;
             
-            // If the distance is less than the circle's radius, there's a collision
             let distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
             return distanceSquared < (radius * radius);
         }
 
         // Check collision with circular hitbox
         function checkCollision() {
-            // Bird center position
             let birdCenterX = containerWidth * 0.15 + BIRD_HITBOX_OFFSET_X + BIRD_RADIUS;
             let birdCenterY = birdY + BIRD_HITBOX_OFFSET_Y + BIRD_RADIUS;
             
-            // Check ground and ceiling collision
             if (birdCenterY - BIRD_RADIUS <= 0 || birdCenterY + BIRD_RADIUS >= containerHeight) {
                 return true;
             }
             
-            // Check pipe collision
             for (let pipe of pipes) {
-                // Check main pipe bodies
                 if (circleRectCollision(birdCenterX, birdCenterY, BIRD_RADIUS, 
                                       pipe.x, 0, PIPE_WIDTH, pipe.topHeight)) {
                     return true;
@@ -567,7 +853,6 @@
                     return true;
                 }
                 
-                // Check pipe caps
                 let topCapY = pipe.topHeight - PIPE_CAP_HEIGHT;
                 if (circleRectCollision(birdCenterX, birdCenterY, BIRD_RADIUS, 
                                       pipe.x - PIPE_CAP_OFFSET, topCapY, PIPE_CAP_WIDTH, PIPE_CAP_HEIGHT)) {
@@ -589,7 +874,6 @@
 
             document.querySelectorAll('.debug-hitbox').forEach(box => box.remove());
             
-            // Bird hitbox - circular
             let birdBox = document.createElement('div');
             birdBox.className = 'debug-hitbox bird-hitbox';
             birdBox.style.left = (containerWidth * 0.15 + BIRD_HITBOX_OFFSET_X) + 'px';
@@ -599,9 +883,7 @@
             birdBox.style.background = 'rgba(0,255,0,0.3)';
             gameContainer.appendChild(birdBox);
             
-            // Pipe hitboxes
             pipes.forEach(pipe => {
-                // Top pipe body
                 let topBox = document.createElement('div');
                 topBox.className = 'debug-hitbox';
                 topBox.style.left = pipe.x + 'px';
@@ -611,7 +893,6 @@
                 topBox.style.background = 'rgba(255,0,0,0.3)';
                 gameContainer.appendChild(topBox);
                 
-                // Top pipe cap
                 let topCapBox = document.createElement('div');
                 topCapBox.className = 'debug-hitbox';
                 topCapBox.style.left = (pipe.x - PIPE_CAP_OFFSET) + 'px';
@@ -621,7 +902,6 @@
                 topCapBox.style.background = 'rgba(255,0,0,0.5)';
                 gameContainer.appendChild(topCapBox);
                 
-                // Bottom pipe body
                 let bottomBox = document.createElement('div');
                 bottomBox.className = 'debug-hitbox';
                 bottomBox.style.left = pipe.x + 'px';
@@ -631,7 +911,6 @@
                 bottomBox.style.background = 'rgba(255,0,0,0.3)';
                 gameContainer.appendChild(bottomBox);
                 
-                // Bottom pipe cap
                 let bottomCapBox = document.createElement('div');
                 bottomCapBox.className = 'debug-hitbox';
                 bottomCapBox.style.left = (pipe.x - PIPE_CAP_OFFSET) + 'px';
@@ -653,26 +932,23 @@
             bird.style.top = birdY + 'px';
             updateBirdRotation();
             
-            // Create new pipes
             if (currentTime - lastPipeTime > pipeInterval) {
                 createPipe();
                 lastPipeTime = currentTime;
             }
             
-            // Update pipes
             for (let i = pipes.length - 1; i >= 0; i--) {
                 let pipe = pipes[i];
                 pipe.x -= pipeSpeed;
                 pipe.container.style.left = pipe.x + 'px';
                 
-                // Check if bird passed the pipe
                 if (!pipe.passed && pipe.x + PIPE_WIDTH + PIPE_CAP_OFFSET < containerWidth * 0.15) {
                     pipe.passed = true;
                     score++;
                     scoreElement.textContent = score;
+                    updateEnvironment();
                 }
                 
-                // Remove pipes that are off screen
                 if (pipe.x < -PIPE_CAP_WIDTH) {
                     pipe.container.remove();
                     pipes.splice(i, 1);
@@ -706,6 +982,13 @@
             scoreElement.textContent = score;
             bird.style.top = birdY + 'px';
             lastPipeTime = performance.now();
+            
+            // Reset environment
+            currentSeason = 'summer';
+            currentTimeOfDay = 'day';
+            gameContainer.className = 'day summer';
+            environmentInfo.textContent = '☀️ Summer Day';
+            
             animationId = requestAnimationFrame(gameLoop);
         }
 
@@ -717,11 +1000,12 @@
             
             if (score > bestScore) {
                 bestScore = score;
-                localStorage.setItem('floppyBirdBestScore', bestScore); // Changed localStorage key
+                localStorage.setItem('floppyBirdBestScore', bestScore);
                 bestScoreElement.textContent = bestScore;
             }
             
             gameOverScreen.style.display = 'block';
+            stopWeatherEvent();
         }
 
         // Reset game
@@ -730,6 +1014,11 @@
                 pipe.container.remove();
             });
             pipes = [];
+            
+            weatherParticles.forEach(particle => {
+                particle.remove();
+            });
+            weatherParticles = [];
             
             document.querySelectorAll('.debug-hitbox').forEach(box => box.remove());
             
@@ -748,8 +1037,7 @@
         window.addEventListener('resize', () => {
             containerWidth = gameContainer.offsetWidth;
             containerHeight = gameContainer.offsetHeight;
-            pipeGap = containerHeight * 0.25; // Keep the larger gap on resize
-            pipeSpeed = containerWidth * 0.0045; // Keep the faster speed on resize
+            pipeSpeed = containerWidth * 0.0045;
         });
 
         // Event listeners
