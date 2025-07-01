@@ -24,93 +24,102 @@
             max-width: 800px;
             max-height: 900px;
             border: 3px solid #333;
-            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #98D98E 80%, #98D98E 100%);
             overflow: hidden;
             cursor: pointer;
-            transition: background 2s ease-in-out;
+        }
+
+        /* Background layers for smooth transitions */
+        .background-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: opacity 3s ease-in-out;
+            pointer-events: none;
         }
 
         /* Day/Night backgrounds */
-        #gameContainer.day {
+        .bg-day {
             background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #98D98E 80%, #98D98E 100%);
         }
 
-        #gameContainer.dawn {
+        .bg-dawn {
             background: linear-gradient(to bottom, #FFB347 0%, #FFB347 80%, #98D98E 80%, #98D98E 100%);
         }
 
-        #gameContainer.dusk {
+        .bg-dusk {
             background: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 80%, #556B2F 80%, #556B2F 100%);
         }
 
-        #gameContainer.night {
+        .bg-night {
             background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 80%, #2C3E50 80%, #2C3E50 100%);
         }
 
         /* Seasonal ground colors */
-        #gameContainer.spring {
+        .bg-spring {
             background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #90EE90 80%, #90EE90 100%);
         }
 
-        #gameContainer.summer {
+        .bg-summer {
             background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #98D98E 80%, #98D98E 100%);
         }
 
-        #gameContainer.autumn {
+        .bg-autumn {
             background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #D2691E 80%, #D2691E 100%);
         }
 
-        #gameContainer.winter {
+        .bg-winter {
             background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #F0F8FF 80%, #F0F8FF 100%);
         }
 
         /* Night variants for seasons */
-        #gameContainer.night.spring {
+        .bg-night.bg-spring {
             background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 80%, #2d4a2b 80%, #2d4a2b 100%);
         }
 
-        #gameContainer.night.summer {
+        .bg-night.bg-summer {
             background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 80%, #2C3E50 80%, #2C3E50 100%);
         }
 
-        #gameContainer.night.autumn {
+        .bg-night.bg-autumn {
             background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 80%, #4a2c2a 80%, #4a2c2a 100%);
         }
 
-        #gameContainer.night.winter {
+        .bg-night.bg-winter {
             background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 80%, #3d4a5c 80%, #3d4a5c 100%);
         }
 
         /* Dawn/Dusk variants for seasons */
-        #gameContainer.dawn.spring {
+        .bg-dawn.bg-spring {
             background: linear-gradient(to bottom, #FFB347 0%, #FFB347 80%, #90EE90 80%, #90EE90 100%);
         }
 
-        #gameContainer.dawn.summer {
+        .bg-dawn.bg-summer {
             background: linear-gradient(to bottom, #FFB347 0%, #FFB347 80%, #98D98E 80%, #98D98E 100%);
         }
 
-        #gameContainer.dawn.autumn {
+        .bg-dawn.bg-autumn {
             background: linear-gradient(to bottom, #FFB347 0%, #FFB347 80%, #D2691E 80%, #D2691E 100%);
         }
 
-        #gameContainer.dawn.winter {
+        .bg-dawn.bg-winter {
             background: linear-gradient(to bottom, #FFB347 0%, #FFB347 80%, #F0F8FF 80%, #F0F8FF 100%);
         }
 
-        #gameContainer.dusk.spring {
+        .bg-dusk.bg-spring {
             background: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 80%, #90EE90 80%, #90EE90 100%);
         }
 
-        #gameContainer.dusk.summer {
+        .bg-dusk.bg-summer {
             background: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 80%, #556B2F 80%, #556B2F 100%);
         }
 
-        #gameContainer.dusk.autumn {
+        .bg-dusk.bg-autumn {
             background: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 80%, #D2691E 80%, #D2691E 100%);
         }
 
-        #gameContainer.dusk.winter {
+        .bg-dusk.bg-winter {
             background: linear-gradient(to bottom, #FF6B6B 0%, #4ECDC4 80%, #F0F8FF 80%, #F0F8FF 100%);
         }
 
@@ -121,6 +130,7 @@
             transition: transform 0.1s linear; /* Changed to linear for direct correlation */
             user-select: none;
             transform: scaleX(-1); /* Flip the bird to face right */
+            z-index: 75;
         }
 
         /* Weather effects */
@@ -152,6 +162,25 @@
         .flower {
             font-size: 20px;
             animation: flowerfall 5s ease-in-out infinite;
+        }
+
+        .lightning {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 90;
+        }
+
+        @keyframes flash {
+            0% { opacity: 0; }
+            10% { opacity: 0.8; }
+            20% { opacity: 0; }
+            100% { opacity: 0; }
         }
 
         @keyframes fall {
@@ -318,10 +347,11 @@
             font-size: 60px;
             opacity: 0.6;
             user-select: none;
-            transition: opacity 2s ease-in-out;
+            transition: opacity 3s ease-in-out;
+            z-index: 60;
         }
 
-        .night .cloud {
+        .night-mode .cloud {
             opacity: 0.3;
         }
 
@@ -357,11 +387,12 @@
             color: white;
             font-size: 10px;
             opacity: 0;
-            transition: opacity 2s ease-in-out;
+            transition: opacity 3s ease-in-out;
             animation: twinkle 3s ease-in-out infinite;
+            z-index: 40;
         }
 
-        .night .star {
+        .night-mode .star {
             opacity: 1;
         }
 
@@ -481,7 +512,14 @@
     </style>
 </head>
 <body>
-    <div id="gameContainer" class="day summer">
+    <div id="gameContainer">
+        <!-- Background layers for smooth transitions -->
+        <div id="bgLayer1" class="background-layer bg-day bg-summer" style="opacity: 1;"></div>
+        <div id="bgLayer2" class="background-layer" style="opacity: 0;"></div>
+        
+        <!-- Lightning effect layer -->
+        <div id="lightning" class="lightning"></div>
+        
         <button id="devMenuToggle" onclick="toggleDevMenu()">⚙️ Dev</button>
         
         <div id="devMenu">
@@ -548,6 +586,12 @@
         let finalScoreElement = document.getElementById('finalScore');
         let bestScoreElement = document.getElementById('bestScore');
         let environmentInfo = document.getElementById('environmentInfo');
+        let lightningElement = document.getElementById('lightning');
+
+        // Background layers
+        let bgLayer1 = document.getElementById('bgLayer1');
+        let bgLayer2 = document.getElementById('bgLayer2');
+        let activeLayer = 1;
 
         // Developer menu elements
         let devMenu = document.getElementById('devMenu');
@@ -590,17 +634,20 @@
         let weatherParticles = [];
         let gameStartTime = 0;
         let lastEnvironmentUpdate = 0;
-        let weatherTimeout = null; // Track weather timeout
-        let weatherCooldown = false; // Prevent overlapping weather events
+        let weatherTimeout = null;
+        let weatherEndTimeout = null;
+        let lightningInterval = null;
 
         // Seasons and times of day
         const seasons = ['spring', 'summer', 'autumn', 'winter'];
         const timesOfDay = ['dawn', 'day', 'dusk', 'night'];
+        
+        // Updated weather types with seasonal restrictions
         const weatherTypes = {
-            spring: ['rain', 'flowers'],
-            summer: ['clear', 'rain'],
-            autumn: ['leaves', 'rain'],
-            winter: ['snow', 'clear']
+            spring: ['rain', 'thunder', 'flowers', 'clear'],
+            summer: ['rain', 'thunder', 'clear'],
+            autumn: ['rain', 'thunder', 'leaves', 'clear'],
+            winter: ['snow', 'rain', 'clear']
         };
 
         const seasonEmojis = {
@@ -618,9 +665,11 @@
         };
 
         // Timing constants
-        const DAY_NIGHT_CYCLE_TIME = 30000; // 30 seconds per time period (2 minutes for full cycle)
-        const SEASON_CHANGE_INTERVAL = 100; // Change season every 100 points
-        const WEATHER_COOLDOWN_TIME = 5000; // 5 seconds minimum between weather events
+        const DAY_NIGHT_CYCLE_TIME = 30000; // 30 seconds per time period
+        const SEASON_CHANGE_INTERVAL = 50; // Reduced from 100 to 50 points for faster seasons
+        const WEATHER_DURATION_MIN = 8000; // 8 seconds minimum
+        const WEATHER_DURATION_MAX = 15000; // 15 seconds maximum
+        const WEATHER_COOLDOWN_TIME = 10000; // 10 seconds between weather events
 
         // Pipe dimensions - exact sizes for hitboxes
         const PIPE_WIDTH = 80;
@@ -670,39 +719,55 @@
             document.getElementById('pipeCount').textContent = pipes.length;
             document.getElementById('pipeSpeedDisplay').textContent = pipeSpeed.toFixed(4);
             document.getElementById('pipeGapDisplay').textContent = pipeGap;
-            document.getElementById('weatherStatus').textContent = isWeatherActive ? weatherType : 'None';
+            
+            let weatherDisplay = 'None';
+            if (isWeatherActive && weatherType) {
+                if (weatherType === 'thunder') {
+                    weatherDisplay = 'Thunderstorm';
+                } else {
+                    weatherDisplay = weatherType.charAt(0).toUpperCase() + weatherType.slice(1);
+                }
+            }
+            document.getElementById('weatherStatus').textContent = weatherDisplay;
         }
 
         // Bird rotation based on velocity - more gradual
         function updateBirdRotation() {
-            // More gradual rotation based on velocity
-            // Scale down the velocity impact for smoother rotation
             let normalizedVelocity = velocity / maxVelocity;
-            
-            // Apply a smoother curve to the rotation
-            // Use a power function to make the rotation more gradual
             let rotationFactor = Math.sign(normalizedVelocity) * Math.pow(Math.abs(normalizedVelocity), 0.7);
-            let rotation = -rotationFactor * 60; // Reduced from 80 to 60 for less extreme angles
-            
-            // Clamp rotation to desired range
-            rotation = Math.max(-50, Math.min(60, rotation)); // Reduced range for more control
-            
+            let rotation = -rotationFactor * 60;
+            rotation = Math.max(-50, Math.min(60, rotation));
             currentRotation = rotation;
             bird.style.transform = `scaleX(-1) rotate(${rotation}deg)`;
         }
 
+        // Update background with smooth transition
+        function updateBackground(newTimeOfDay, newSeason) {
+            let currentLayer = activeLayer === 1 ? bgLayer1 : bgLayer2;
+            let nextLayer = activeLayer === 1 ? bgLayer2 : bgLayer1;
+            
+            nextLayer.className = `background-layer bg-${newTimeOfDay} bg-${newSeason}`;
+            nextLayer.style.opacity = '1';
+            currentLayer.style.opacity = '0';
+            
+            activeLayer = activeLayer === 1 ? 2 : 1;
+            
+            if (newTimeOfDay === 'night') {
+                gameContainer.classList.add('night-mode');
+            } else {
+                gameContainer.classList.remove('night-mode');
+            }
+        }
+
         // Update environment based on time and score
         function updateEnvironment(currentTime) {
-            // Time-based day/night cycle
             let timeSinceStart = currentTime - gameStartTime;
             let dayNightCycle = Math.floor(timeSinceStart / DAY_NIGHT_CYCLE_TIME) % 4;
             let newTimeOfDay = timesOfDay[dayNightCycle];
             
-            // Score-based season change
             let seasonCycle = Math.floor(score / SEASON_CHANGE_INTERVAL) % 4;
             let newSeason = seasons[seasonCycle];
             
-            // Update if changed
             if (newTimeOfDay !== currentTimeOfDay || newSeason !== currentSeason) {
                 let environmentChanged = false;
                 
@@ -717,10 +782,8 @@
                 }
                 
                 if (environmentChanged) {
-                    // Update classes
-                    gameContainer.className = `${currentTimeOfDay} ${currentSeason}`;
+                    updateBackground(currentTimeOfDay, currentSeason);
                     
-                    // Update info display
                     let timeEmoji = timeEmojis[currentTimeOfDay];
                     let seasonEmoji = seasonEmojis[currentSeason];
                     let seasonName = currentSeason.charAt(0).toUpperCase() + currentSeason.slice(1);
@@ -728,19 +791,29 @@
                     
                     environmentInfo.textContent = `${timeEmoji} ${seasonName} ${timeName}`;
                     
-                    // Trigger weather event on time change (not just season change)
-                    // Only if not on cooldown and no weather active
-                    if (!weatherCooldown && !isWeatherActive && Math.random() < 0.5) {
-                        startWeatherEvent();
+                    // Chance of weather on environment change
+                    if (!isWeatherActive && Math.random() < 0.4) {
+                        setTimeout(() => {
+                            if (!isWeatherActive) {
+                                startWeatherEvent();
+                            }
+                        }, 3000);
                     }
                 }
             }
         }
 
+        // Lightning effect
+        function createLightning() {
+            lightningElement.style.animation = 'flash 0.5s ease-out';
+            setTimeout(() => {
+                lightningElement.style.animation = '';
+            }, 500);
+        }
+
         // Start weather event
         function startWeatherEvent() {
-            // Prevent starting if already active or on cooldown
-            if (isWeatherActive || weatherCooldown) return;
+            if (isWeatherActive) return;
             
             let possibleWeather = weatherTypes[currentSeason];
             weatherType = possibleWeather[Math.floor(Math.random() * possibleWeather.length)];
@@ -748,32 +821,46 @@
             if (weatherType === 'clear') return;
             
             isWeatherActive = true;
-            weatherCooldown = true;
             
-            // Stop any existing weather particles creation
+            // Clear any existing timeouts
             clearTimeout(weatherTimeout);
+            clearTimeout(weatherEndTimeout);
+            clearInterval(lightningInterval);
             
-            // Create initial batch of weather particles
-            for (let i = 0; i < 20; i++) { // Reduced from 30 to 20
-                setTimeout(() => createWeatherParticle(), i * 150); // Increased spacing
+            // Start weather particles
+            if (weatherType !== 'clear') {
+                for (let i = 0; i < 15; i++) {
+                    setTimeout(() => createWeatherParticle(), i * 200);
+                }
             }
             
-            // Stop weather after 10-20 seconds
-            weatherTimeout = setTimeout(stopWeatherEvent, 10000 + Math.random() * 10000);
+            // Special handling for thunderstorms
+            if (weatherType === 'thunder') {
+                lightningInterval = setInterval(() => {
+                    if (Math.random() < 0.3 && isWeatherActive) {
+                        createLightning();
+                    }
+                }, 3000);
+            }
+            
+            // Schedule weather end
+            let duration = WEATHER_DURATION_MIN + Math.random() * (WEATHER_DURATION_MAX - WEATHER_DURATION_MIN);
+            weatherEndTimeout = setTimeout(stopWeatherEvent, duration);
         }
 
         // Stop weather event
         function stopWeatherEvent() {
             isWeatherActive = false;
-            weatherType = null;
             
-            // Clear the weather timeout
             clearTimeout(weatherTimeout);
-            weatherTimeout = null;
+            clearTimeout(weatherEndTimeout);
+            clearInterval(lightningInterval);
             
-            // Set cooldown period before next weather event
-            setTimeout(() => {
-                weatherCooldown = false;
+            // Schedule next weather event
+            weatherTimeout = setTimeout(() => {
+                if (gameRunning && Math.random() < 0.5) {
+                    startWeatherEvent();
+                }
             }, WEATHER_COOLDOWN_TIME);
         }
 
@@ -786,6 +873,7 @@
             
             switch (weatherType) {
                 case 'rain':
+                case 'thunder':
                     particle.className += ' raindrop';
                     particle.style.left = Math.random() * 100 + '%';
                     particle.style.animationDuration = (0.5 + Math.random() * 0.5) + 's';
@@ -816,15 +904,13 @@
             gameContainer.appendChild(particle);
             weatherParticles.push(particle);
             
-            // Remove particle after animation
             particle.addEventListener('animationend', () => {
                 particle.remove();
                 weatherParticles = weatherParticles.filter(p => p !== particle);
             });
             
-            // Create more particles while weather is active (with controlled rate)
-            if (isWeatherActive && weatherParticles.length < 50) { // Limit total particles
-                setTimeout(createWeatherParticle, 300 + Math.random() * 700); // Increased delay
+            if (isWeatherActive && weatherParticles.length < 30) {
+                setTimeout(createWeatherParticle, 400 + Math.random() * 600);
             }
         }
 
@@ -843,6 +929,7 @@
             let pipeContainer = document.createElement('div');
             pipeContainer.style.position = 'absolute';
             pipeContainer.style.left = containerWidth + 'px';
+            pipeContainer.style.zIndex = '70';
             
             // TOP PIPE
             let topPipeBody = document.createElement('div');
@@ -1003,7 +1090,6 @@
             bird.style.top = birdY + 'px';
             updateBirdRotation();
             
-            // Update environment based on time
             updateEnvironment(currentTime);
             
             if (currentTime - lastPipeTime > pipeInterval) {
@@ -1020,7 +1106,6 @@
                     pipe.passed = true;
                     score++;
                     scoreElement.textContent = score;
-                    // Season might change on score update
                     updateEnvironment(currentTime);
                 }
                 
@@ -1057,22 +1142,31 @@
             scoreElement.textContent = score;
             bird.style.top = birdY + 'px';
             
-            // Initialize time tracking
             gameStartTime = performance.now();
             lastPipeTime = gameStartTime;
             lastEnvironmentUpdate = gameStartTime;
             
-            // Reset environment
             currentSeason = 'summer';
             currentTimeOfDay = 'day';
-            gameContainer.className = 'day summer';
+            bgLayer1.className = 'background-layer bg-day bg-summer';
+            bgLayer1.style.opacity = '1';
+            bgLayer2.style.opacity = '0';
+            activeLayer = 1;
+            gameContainer.classList.remove('night-mode');
             environmentInfo.textContent = '☀️ Summer Day';
             
-            // Reset weather system
             isWeatherActive = false;
-            weatherCooldown = false;
             weatherType = null;
             clearTimeout(weatherTimeout);
+            clearTimeout(weatherEndTimeout);
+            clearInterval(lightningInterval);
+            
+            // Schedule first weather event
+            weatherTimeout = setTimeout(() => {
+                if (gameRunning) {
+                    startWeatherEvent();
+                }
+            }, 5000 + Math.random() * 10000);
             
             animationId = requestAnimationFrame(gameLoop);
         }
@@ -1091,6 +1185,9 @@
             
             gameOverScreen.style.display = 'block';
             stopWeatherEvent();
+            clearTimeout(weatherTimeout);
+            clearTimeout(weatherEndTimeout);
+            clearInterval(lightningInterval);
         }
 
         // Reset game
