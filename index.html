@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Floppy Bird 🐦</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 70%, #98D98E 70%, #98D98E 100%);
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 90vw;
+            height: 90vh;
+            max-width: 800px;
+            max-height: 900px;
+            border: 3px solid #333;
+            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 80%, #98D98E 80%, #98D98E 100%);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        #bird {
+            position: absolute;
+            font-size: 50px;
+            left: 15%;
+            transition: transform 0.15s ease-out; /* Smoothed rotation transition */
+            user-select: none;
+            transform: scaleX(-1); /* Flip the bird to face right */
+        }
+
+        /* New pipe styles - direct elements instead of CSS pseudo-elements */
+        .pipe-body {
+            position: absolute;
+            background: linear-gradient(to right, #228B22, #006400);
+            border: 2px solid #004d00;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        .pipe-cap {
+            position: absolute;
+            background: linear-gradient(to right, #228B22, #006400);
+            border: 2px solid #004d00;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        /* Debug hitbox visualization */
+        .debug-hitbox {
+            position: absolute;
+            border: 2px solid red;
+            background: rgba(255,0,0,0.2);
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .debug-hitbox.bird-hitbox {
+            border-radius: 50%; /* Round hitbox for bird */
+        }
+
+        #score {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 60px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            z-index: 100;
+            user-select: none;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none;
+            background: rgba(255,255,255,0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.4);
+            z-index: 200;
+        }
+
+        #gameOver h2 {
+            margin: 0 0 20px 0;
+            font-size: 48px;
+            color: #333;
+        }
+
+        #gameOver p {
+            margin: 15px 0;
+            font-size: 28px;
+            color: #666;
+        }
+
+        #gameOver button {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #gameOver button:hover {
+            background: #45a049;
+        }
+
+        #startScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(255,255,255,0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.4);
+            z-index: 200;
+        }
+
+        #startScreen h1 {
+            margin: 0 0 20px 0;
+            font-size: 48px;
+            color: #333;
+        }
+
+        #startScreen p {
+            margin: 20px 0;
+            font-size: 22px;
+            color: #666;
+        }
+
+        #startScreen button {
+            padding: 15px 40px;
+            font-size: 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #startScreen button:hover {
+            background: #45a049;
+        }
+
+        .cloud {
+            position: absolute;
+            font-size: 60px;
+            opacity: 0.6;
+            user-select: none;
+        }
+
+        #cloud1 {
+            top: 10%;
+            animation: moveCloud 30s linear infinite;
+        }
+
+        #cloud2 {
+            top: 25%;
+            animation: moveCloud 40s linear infinite;
+            animation-delay: -15s;
+        }
+
+        #cloud3 {
+            top: 15%;
+            animation: moveCloud 35s linear infinite;
+            animation-delay: -25s;
+        }
+
+        @keyframes moveCloud {
+            from {
+                left: 100%;
+            }
+            to {
+                left: -15%;
+            }
+        }
+
+        /* Developer Options Menu */
+        #devMenu {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1100;
+            min-width: 200px;
+            display: none;
+        }
+
+        #devMenu h3 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 8px;
+        }
+
+        #devMenuToggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1050;
+            transition: background 0.3s;
+        }
+
+        #devMenuToggle:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .dev-option {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dev-option label {
+            flex: 1;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin-left: 10px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .dev-stats {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #555;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <button id="devMenuToggle" onclick="toggleDevMenu()">⚙️ Dev</button>
+        
+        <div id="devMenu">
+            <h3>🛠️ Developer Options</h3>
+            <div class="dev-option">
+                <label for="hitboxToggle">Show Hitboxes</label>
+                <label class="switch">
+                    <input type="checkbox" id="hitboxToggle" onchange="toggleHitboxes()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="dev-stats" id="devStats">
+                <div>FPS: <span id="fpsCounter">0</span></div>
+                <div>Bird Y: <span id="birdYPos">0</span></div>
+                <div>Velocity: <span id="birdVelocity">0</span></div>
+                <div>Rotation: <span id="birdRotation">0</span>°</div>
+                <div>Pipes: <span id="pipeCount">0</span></div>
+                <div>Pipe Speed: <span id="pipeSpeedDisplay">0</span></div>
+            </div>
+        </div>
+
+        <div id="cloud1" class="cloud">☁️</div>
+        <div id="cloud2" class="cloud">☁️</div>
+        <div id="cloud3" class="cloud">☁️</div>
+        <div id="score">0</div>
+        <div id="bird">🐦</div>
+        
+        <div id="startScreen">
+            <h1>Emoji Floppy Bird 🐦</h1>
+            <p>Click or press Space to flap!</p>
+            <p>Avoid the pipes! 🚧</p>
+            <button onclick="startGame()">Start Game</button>
+        </div>
+        
+        <div id="gameOver">
+            <h2>Game Over! 💥</h2>
+            <p>Your Score: <span id="finalScore">0</span></p>
+            <p>Best Score: <span id="bestScore">0</span></p>
+            <button onclick="resetGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        let bird = document.getElementById('bird');
+        let gameContainer = document.getElementById('gameContainer');
+        let scoreElement = document.getElementById('score');
+        let gameOverScreen = document.getElementById('gameOver');
+        let startScreen = document.getElementById('startScreen');
+        let finalScoreElement = document.getElementById('finalScore');
+        let bestScoreElement = document.getElementById('bestScore');
+
+        // Developer menu elements
+        let devMenu = document.getElementById('devMenu');
+        let hitboxToggle = document.getElementById('hitboxToggle');
+        let showHitboxes = false;
+
+        // FPS counter variables
+        let lastFrameTime = performance.now();
+        let frameCount = 0;
+        let fps = 0;
+
+        // Get container dimensions
+        let containerWidth = gameContainer.offsetWidth;
+        let containerHeight = gameContainer.offsetHeight;
+
+        // Bird physics - adjusted for higher arc flapping
+        let birdY = containerHeight / 2;
+        let velocity = 0;
+        let gravity = 0.3; // Slightly increased from 0.25 for more pronounced arc
+        let jumpPower = -7.5; // Increased from -6 for higher jumps
+        let maxVelocity = 8; // Cap the falling speed
+        let currentRotation = 0; // Track current rotation for dev stats
+        
+        // Game variables
+        let score = 0;
+        let bestScore = localStorage.getItem('floppyBirdBestScore') || 0; // Changed localStorage key
+        let gameRunning = false;
+        let pipes = [];
+        let pipeGap = containerHeight * 0.25; // Increased from 0.22 (added ~10px to gap)
+        let pipeSpeed = containerWidth * 0.0045; // Increased from 0.003 to 0.0045 (50% faster)
+        let pipeInterval = 3000; // Reduced from 3500 to compensate for faster movement
+        let lastPipeTime = 0;
+        let animationId;
+
+        // Pipe dimensions - exact sizes for hitboxes
+        const PIPE_WIDTH = 80;
+        const PIPE_CAP_WIDTH = 100;
+        const PIPE_CAP_HEIGHT = 40;
+        const PIPE_CAP_OFFSET = (PIPE_CAP_WIDTH - PIPE_WIDTH) / 2; // 10px on each side
+
+        // Bird hitbox offset - moved 8px down and 8px right
+        const BIRD_HITBOX_OFFSET_X = 8;
+        const BIRD_HITBOX_OFFSET_Y = 8;
+        const BIRD_RADIUS = 22.5; // Half of 45px for circular hitbox
+
+        // Initialize best score display
+        bestScoreElement.textContent = bestScore;
+
+        // Toggle developer menu
+        function toggleDevMenu() {
+            if (devMenu.style.display === 'block') {
+                devMenu.style.display = 'none';
+            } else {
+                devMenu.style.display = 'block';
+            }
+        }
+
+        // Toggle hitbox visibility
+        function toggleHitboxes() {
+            showHitboxes = hitboxToggle.checked;
+            if (!showHitboxes) {
+                document.querySelectorAll('.debug-hitbox').forEach(box => box.remove());
+            }
+        }
+
+        // Update developer stats
+        function updateDevStats() {
+            frameCount++;
+            let currentTime = performance.now();
+            if (currentTime - lastFrameTime >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFrameTime = currentTime;
+                document.getElementById('fpsCounter').textContent = fps;
+            }
+
+            document.getElementById('birdYPos').textContent = Math.round(birdY);
+            document.getElementById('birdVelocity').textContent = velocity.toFixed(2);
+            document.getElementById('birdRotation').textContent = Math.round(currentRotation);
+            document.getElementById('pipeCount').textContent = pipes.length;
+            document.getElementById('pipeSpeedDisplay').textContent = pipeSpeed.toFixed(4);
+        }
+
+        // Bird rotation based on velocity - extreme 150-degree range
+        function updateBirdRotation() {
+            // Much more dramatic rotation with extreme range
+            let rotation = velocity * -10; // Significantly increased multiplier
+            
+            // Apply exponential scaling for more extreme rotations at high velocities
+            if (velocity > 4) {
+                rotation = rotation * 1.2; // Extra boost when falling fast
+            } else if (velocity < -4) {
+                rotation = rotation * 1.2; // Extra boost when rising fast
+            }
+            
+            // Apply smoothing in the middle range
+            if (Math.abs(velocity) < 2) {
+                rotation = rotation * 0.8; // Slight smoothing for small velocities
+            }
+            
+            // Allow almost full 150-degree range: from -70° (pointing up) to 80° (pointing down)
+            rotation = Math.max(-70, Math.min(80, rotation));
+            
+            currentRotation = rotation; // Store for dev stats
+            bird.style.transform = `scaleX(-1) rotate(${rotation}deg)`;
+        }
+
+        // Create pipe with visual elements matching hitboxes exactly
+        function createPipe() {
+            let minHeight = containerHeight * 0.15;
+            let maxHeight = containerHeight * 0.52; // Adjusted to accommodate larger gap
+            let pipeHeight = Math.random() * (maxHeight - minHeight) + minHeight;
+            
+            // Create pipe container
+            let pipeContainer = document.createElement('div');
+            pipeContainer.style.position = 'absolute';
+            pipeContainer.style.left = containerWidth + 'px';
+            
+            // TOP PIPE
+            // Top pipe body
+            let topPipeBody = document.createElement('div');
+            topPipeBody.className = 'pipe-body';
+            topPipeBody.style.width = PIPE_WIDTH + 'px';
+            topPipeBody.style.height = pipeHeight + 'px';
+            topPipeBody.style.left = '0px';
+            topPipeBody.style.top = '0px';
+            
+            // Top pipe cap
+            let topPipeCap = document.createElement('div');
+            topPipeCap.className = 'pipe-cap';
+            topPipeCap.style.width = PIPE_CAP_WIDTH + 'px';
+            topPipeCap.style.height = PIPE_CAP_HEIGHT + 'px';
+            topPipeCap.style.left = -PIPE_CAP_OFFSET + 'px';
+            topPipeCap.style.top = (pipeHeight - PIPE_CAP_HEIGHT) + 'px';
+            
+            // BOTTOM PIPE
+            let bottomPipeY = pipeHeight + pipeGap;
+            let bottomPipeHeight = containerHeight - bottomPipeY;
+            
+            // Bottom pipe body
+            let bottomPipeBody = document.createElement('div');
+            bottomPipeBody.className = 'pipe-body';
+            bottomPipeBody.style.width = PIPE_WIDTH + 'px';
+            bottomPipeBody.style.height = bottomPipeHeight + 'px';
+            bottomPipeBody.style.left = '0px';
+            bottomPipeBody.style.top = bottomPipeY + 'px';
+            
+            // Bottom pipe cap
+            let bottomPipeCap = document.createElement('div');
+            bottomPipeCap.className = 'pipe-cap';
+            bottomPipeCap.style.width = PIPE_CAP_WIDTH + 'px';
+            bottomPipeCap.style.height = PIPE_CAP_HEIGHT + 'px';
+            bottomPipeCap.style.left = -PIPE_CAP_OFFSET + 'px';
+            bottomPipeCap.style.top = bottomPipeY + 'px';
+            
+            // Add all elements to container
+            pipeContainer.appendChild(topPipeBody);
+            pipeContainer.appendChild(topPipeCap);
+            pipeContainer.appendChild(bottomPipeBody);
+            pipeContainer.appendChild(bottomPipeCap);
+            gameContainer.appendChild(pipeContainer);
+            
+            pipes.push({
+                container: pipeContainer,
+                passed: false,
+                x: containerWidth,
+                topHeight: pipeHeight,
+                bottomY: bottomPipeY
+            });
+        }
+
+        // Helper function for circle-rectangle collision
+        function circleRectCollision(circleX, circleY, radius, rectX, rectY, rectWidth, rectHeight) {
+            // Find the closest point to the circle within the rectangle
+            let closestX = Math.max(rectX, Math.min(circleX, rectX + rectWidth));
+            let closestY = Math.max(rectY, Math.min(circleY, rectY + rectHeight));
+            
+            // Calculate the distance between the circle's center and this closest point
+            let distanceX = circleX - closestX;
+            let distanceY = circleY - closestY;
+            
+            // If the distance is less than the circle's radius, there's a collision
+            let distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+            return distanceSquared < (radius * radius);
+        }
+
+        // Check collision with circular hitbox
+        function checkCollision() {
+            // Bird center position
+            let birdCenterX = containerWidth * 0.15 + BIRD_HITBOX_OFFSET_X + BIRD_RADIUS;
+            let birdCenterY = birdY + BIRD_HITBOX_OFFSET_Y + BIRD_RADIUS;
+            
+            // Check ground and ceiling collision
+            if (birdCenterY - BIRD_RADIUS <= 0 || birdCenterY + BIRD_RADIUS >= containerHeight) {
+                return true;
+            }
+            
+            // Check pipe collision
+            for (let pipe of pipes) {
+                // Check main pipe bodies
+                if (circleRectCollision(birdCenterX, birdCenterY, BIRD_RADIUS, 
+                                      pipe.x, 0, PIPE_WIDTH, pipe.topHeight)) {
+                    return true;
+                }
+                
+                if (circleRectCollision(birdCenterX, birdCenterY, BIRD_RADIUS, 
+                                      pipe.x, pipe.bottomY, PIPE_WIDTH, containerHeight - pipe.bottomY)) {
+                    return true;
+                }
+                
+                // Check pipe caps
+                let topCapY = pipe.topHeight - PIPE_CAP_HEIGHT;
+                if (circleRectCollision(birdCenterX, birdCenterY, BIRD_RADIUS, 
+                                      pipe.x - PIPE_CAP_OFFSET, topCapY, PIPE_CAP_WIDTH, PIPE_CAP_HEIGHT)) {
+                    return true;
+                }
+                
+                if (circleRectCollision(birdCenterX, birdCenterY, BIRD_RADIUS, 
+                                      pipe.x - PIPE_CAP_OFFSET, pipe.bottomY, PIPE_CAP_WIDTH, PIPE_CAP_HEIGHT)) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // Draw debug hitboxes
+        function drawDebugHitboxes() {
+            if (!showHitboxes) return;
+
+            document.querySelectorAll('.debug-hitbox').forEach(box => box.remove());
+            
+            // Bird hitbox - circular
+            let birdBox = document.createElement('div');
+            birdBox.className = 'debug-hitbox bird-hitbox';
+            birdBox.style.left = (containerWidth * 0.15 + BIRD_HITBOX_OFFSET_X) + 'px';
+            birdBox.style.top = (birdY + BIRD_HITBOX_OFFSET_Y) + 'px';
+            birdBox.style.width = (BIRD_RADIUS * 2) + 'px';
+            birdBox.style.height = (BIRD_RADIUS * 2) + 'px';
+            birdBox.style.background = 'rgba(0,255,0,0.3)';
+            gameContainer.appendChild(birdBox);
+            
+            // Pipe hitboxes
+            pipes.forEach(pipe => {
+                // Top pipe body
+                let topBox = document.createElement('div');
+                topBox.className = 'debug-hitbox';
+                topBox.style.left = pipe.x + 'px';
+                topBox.style.top = '0px';
+                topBox.style.width = PIPE_WIDTH + 'px';
+                topBox.style.height = pipe.topHeight + 'px';
+                topBox.style.background = 'rgba(255,0,0,0.3)';
+                gameContainer.appendChild(topBox);
+                
+                // Top pipe cap
+                let topCapBox = document.createElement('div');
+                topCapBox.className = 'debug-hitbox';
+                topCapBox.style.left = (pipe.x - PIPE_CAP_OFFSET) + 'px';
+                topCapBox.style.top = (pipe.topHeight - PIPE_CAP_HEIGHT) + 'px';
+                topCapBox.style.width = PIPE_CAP_WIDTH + 'px';
+                topCapBox.style.height = PIPE_CAP_HEIGHT + 'px';
+                topCapBox.style.background = 'rgba(255,0,0,0.5)';
+                gameContainer.appendChild(topCapBox);
+                
+                // Bottom pipe body
+                let bottomBox = document.createElement('div');
+                bottomBox.className = 'debug-hitbox';
+                bottomBox.style.left = pipe.x + 'px';
+                bottomBox.style.top = pipe.bottomY + 'px';
+                bottomBox.style.width = PIPE_WIDTH + 'px';
+                bottomBox.style.height = (containerHeight - pipe.bottomY) + 'px';
+                bottomBox.style.background = 'rgba(255,0,0,0.3)';
+                gameContainer.appendChild(bottomBox);
+                
+                // Bottom pipe cap
+                let bottomCapBox = document.createElement('div');
+                bottomCapBox.className = 'debug-hitbox';
+                bottomCapBox.style.left = (pipe.x - PIPE_CAP_OFFSET) + 'px';
+                bottomCapBox.style.top = pipe.bottomY + 'px';
+                bottomCapBox.style.width = PIPE_CAP_WIDTH + 'px';
+                bottomCapBox.style.height = PIPE_CAP_HEIGHT + 'px';
+                bottomCapBox.style.background = 'rgba(255,0,0,0.5)';
+                gameContainer.appendChild(bottomCapBox);
+            });
+        }
+
+        // Game loop
+        function gameLoop(currentTime) {
+            if (!gameRunning) return;
+            
+            velocity += gravity;
+            velocity = Math.min(velocity, maxVelocity);
+            birdY += velocity;
+            bird.style.top = birdY + 'px';
+            updateBirdRotation();
+            
+            // Create new pipes
+            if (currentTime - lastPipeTime > pipeInterval) {
+                createPipe();
+                lastPipeTime = currentTime;
+            }
+            
+            // Update pipes
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                let pipe = pipes[i];
+                pipe.x -= pipeSpeed;
+                pipe.container.style.left = pipe.x + 'px';
+                
+                // Check if bird passed the pipe
+                if (!pipe.passed && pipe.x + PIPE_WIDTH + PIPE_CAP_OFFSET < containerWidth * 0.15) {
+                    pipe.passed = true;
+                    score++;
+                    scoreElement.textContent = score;
+                }
+                
+                // Remove pipes that are off screen
+                if (pipe.x < -PIPE_CAP_WIDTH) {
+                    pipe.container.remove();
+                    pipes.splice(i, 1);
+                }
+            }
+            
+            updateDevStats();
+            drawDebugHitboxes();
+            
+            if (checkCollision()) {
+                endGame();
+                return;
+            }
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // Jump function
+        function jump() {
+            if (!gameRunning) return;
+            velocity = jumpPower;
+        }
+
+        // Start game
+        function startGame() {
+            startScreen.style.display = 'none';
+            gameRunning = true;
+            birdY = containerHeight / 2;
+            velocity = 0;
+            score = 0;
+            scoreElement.textContent = score;
+            bird.style.top = birdY + 'px';
+            lastPipeTime = performance.now();
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // End game
+        function endGame() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            finalScoreElement.textContent = score;
+            
+            if (score > bestScore) {
+                bestScore = score;
+                localStorage.setItem('floppyBirdBestScore', bestScore); // Changed localStorage key
+                bestScoreElement.textContent = bestScore;
+            }
+            
+            gameOverScreen.style.display = 'block';
+        }
+
+        // Reset game
+        function resetGame() {
+            pipes.forEach(pipe => {
+                pipe.container.remove();
+            });
+            pipes = [];
+            
+            document.querySelectorAll('.debug-hitbox').forEach(box => box.remove());
+            
+            birdY = containerHeight / 2;
+            velocity = 0;
+            score = 0;
+            scoreElement.textContent = score;
+            bird.style.top = birdY + 'px';
+            bird.style.transform = 'scaleX(-1) rotate(0deg)';
+            
+            gameOverScreen.style.display = 'none';
+            startGame();
+        }
+
+        // Update dimensions on window resize
+        window.addEventListener('resize', () => {
+            containerWidth = gameContainer.offsetWidth;
+            containerHeight = gameContainer.offsetHeight;
+            pipeGap = containerHeight * 0.25; // Keep the larger gap on resize
+            pipeSpeed = containerWidth * 0.0045; // Keep the faster speed on resize
+        });
+
+        // Event listeners
+        gameContainer.addEventListener('mousedown', (e) => {
+            if (e.target.id === 'devMenuToggle' || devMenu.contains(e.target)) {
+                return;
+            }
+            e.preventDefault();
+            jump();
+        });
+        
+        gameContainer.addEventListener('touchstart', (e) => {
+            if (e.target.id === 'devMenuToggle' || devMenu.contains(e.target)) {
+                return;
+            }
+            e.preventDefault();
+            jump();
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                jump();
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target === document.body) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
