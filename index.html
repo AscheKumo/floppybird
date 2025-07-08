@@ -127,9 +127,9 @@
             position: absolute;
             font-size: 50px;
             left: 15%;
-            transition: transform 0.1s linear; /* Changed to linear for direct correlation */
+            transition: transform 0.1s linear;
             user-select: none;
-            transform: scaleX(-1); /* Flip the bird to face right */
+            transform: scaleX(-1);
             z-index: 75;
         }
 
@@ -207,7 +207,7 @@
             }
         }
 
-        /* New pipe styles - direct elements instead of CSS pseudo-elements */
+        /* Pipe styles */
         .pipe-body {
             position: absolute;
             background: linear-gradient(to right, #228B22, #006400);
@@ -232,7 +232,7 @@
         }
 
         .debug-hitbox.bird-hitbox {
-            border-radius: 50%; /* Round hitbox for bird */
+            border-radius: 50%;
         }
 
         #score {
@@ -513,11 +513,9 @@
 </head>
 <body>
     <div id="gameContainer">
-        <!-- Background layers for smooth transitions -->
         <div id="bgLayer1" class="background-layer bg-day bg-summer" style="opacity: 1;"></div>
         <div id="bgLayer2" class="background-layer" style="opacity: 0;"></div>
         
-        <!-- Lightning effect layer -->
         <div id="lightning" class="lightning"></div>
         
         <button id="devMenuToggle" onclick="toggleDevMenu()">⚙️ Dev</button>
@@ -545,7 +543,6 @@
 
         <div id="environmentInfo">☀️ Summer Day</div>
         
-        <!-- Stars for night time -->
         <div class="star" style="top: 20%; left: 10%;">✦</div>
         <div class="star" style="top: 30%; left: 25%;">✦</div>
         <div class="star" style="top: 15%; left: 40%;">✦</div>
@@ -607,11 +604,11 @@
         let containerWidth = gameContainer.offsetWidth;
         let containerHeight = gameContainer.offsetHeight;
 
-        // Bird physics - adjusted for higher arc flapping
+        // Bird physics
         let birdY = containerHeight / 2;
         let velocity = 0;
-        let gravity = 0.2; // Reduced from 0.3 for more floaty feel
-        let jumpPower = -5; // Reduced from -7.5 for more gradual acceleration
+        let gravity = 0.2;
+        let jumpPower = -5;
         let maxVelocity = 8;
         let currentRotation = 0;
         
@@ -621,10 +618,10 @@
         let gameRunning = false;
         let pipes = [];
         let pipeGap = 165;
-        let pipeSpeed = containerWidth * 0.0045;
-        let pipeInterval = 3000;
-        let lastPipeTime = 0;
+        let pipeSpeed = containerWidth * 0.0035; // Slower pipe speed
+        let pipeSpacing = Math.floor(containerWidth * 0.45);
         let animationId;
+        let lastOpeningCenter = null; // Track last pipe opening for safe generation
 
         // Environment variables
         let currentSeason = 'summer';
@@ -633,16 +630,14 @@
         let weatherType = null;
         let weatherParticles = [];
         let gameStartTime = 0;
-        let lastEnvironmentUpdate = 0;
         let weatherTimeout = null;
         let weatherEndTimeout = null;
         let lightningInterval = null;
 
-        // Seasons and times of day
+        // Constants
         const seasons = ['spring', 'summer', 'autumn', 'winter'];
         const timesOfDay = ['dawn', 'day', 'dusk', 'night'];
         
-        // Updated weather types with seasonal restrictions
         const weatherTypes = {
             spring: ['rain', 'thunder', 'flowers', 'clear'],
             summer: ['rain', 'thunder', 'clear'],
@@ -664,20 +659,17 @@
             night: '🌙'
         };
 
-        // Timing constants
-        const DAY_NIGHT_CYCLE_TIME = 30000; // 30 seconds per time period
-        const SEASON_CHANGE_INTERVAL = 50; // Reduced from 100 to 50 points for faster seasons
-        const WEATHER_DURATION_MIN = 8000; // 8 seconds minimum
-        const WEATHER_DURATION_MAX = 15000; // 15 seconds maximum
-        const WEATHER_COOLDOWN_TIME = 10000; // 10 seconds between weather events
+        const DAY_NIGHT_CYCLE_TIME = 30000;
+        const SEASON_CHANGE_INTERVAL = 50;
+        const WEATHER_DURATION_MIN = 8000;
+        const WEATHER_DURATION_MAX = 15000;
+        const WEATHER_COOLDOWN_TIME = 10000;
 
-        // Pipe dimensions - exact sizes for hitboxes
         const PIPE_WIDTH = 80;
         const PIPE_CAP_WIDTH = 100;
         const PIPE_CAP_HEIGHT = 40;
         const PIPE_CAP_OFFSET = (PIPE_CAP_WIDTH - PIPE_WIDTH) / 2;
 
-        // Bird hitbox offset - moved 8px down and 8px right
         const BIRD_HITBOX_OFFSET_X = 8;
         const BIRD_HITBOX_OFFSET_Y = 8;
         const BIRD_RADIUS = 22.5;
@@ -731,7 +723,7 @@
             document.getElementById('weatherStatus').textContent = weatherDisplay;
         }
 
-        // Bird rotation based on velocity - more gradual
+        // Bird rotation based on velocity
         function updateBirdRotation() {
             let normalizedVelocity = velocity / maxVelocity;
             let rotationFactor = Math.sign(normalizedVelocity) * Math.pow(Math.abs(normalizedVelocity), 0.7);
@@ -791,7 +783,6 @@
                     
                     environmentInfo.textContent = `${timeEmoji} ${seasonName} ${timeName}`;
                     
-                    // Chance of weather on environment change
                     if (!isWeatherActive && Math.random() < 0.4) {
                         setTimeout(() => {
                             if (!isWeatherActive) {
@@ -822,19 +813,14 @@
             
             isWeatherActive = true;
             
-            // Clear any existing timeouts
             clearTimeout(weatherTimeout);
             clearTimeout(weatherEndTimeout);
             clearInterval(lightningInterval);
             
-            // Start weather particles
-            if (weatherType !== 'clear') {
-                for (let i = 0; i < 15; i++) {
-                    setTimeout(() => createWeatherParticle(), i * 200);
-                }
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => createWeatherParticle(), i * 200);
             }
             
-            // Special handling for thunderstorms
             if (weatherType === 'thunder') {
                 lightningInterval = setInterval(() => {
                     if (Math.random() < 0.3 && isWeatherActive) {
@@ -843,7 +829,6 @@
                 }, 3000);
             }
             
-            // Schedule weather end
             let duration = WEATHER_DURATION_MIN + Math.random() * (WEATHER_DURATION_MAX - WEATHER_DURATION_MIN);
             weatherEndTimeout = setTimeout(stopWeatherEvent, duration);
         }
@@ -856,7 +841,6 @@
             clearTimeout(weatherEndTimeout);
             clearInterval(lightningInterval);
             
-            // Schedule next weather event
             weatherTimeout = setTimeout(() => {
                 if (gameRunning && Math.random() < 0.5) {
                     startWeatherEvent();
@@ -914,24 +898,64 @@
             }
         }
 
-        // Create pipe with visual elements matching hitboxes exactly
-        function createPipe() {
-            let minTopHeight = 100;
-            let minBottomHeight = 100;
-            let maxTopHeight = containerHeight - pipeGap - minBottomHeight;
+        // Calculate bird's max climb/fall between pipes
+        function getBirdMaxClimbOrFallPerPipe() {
+            const frames = pipeSpacing / pipeSpeed;
+            const flapInterval = 15;
+            let y = 0, v = 0, maxClimb = 0, maxFall = 0;
             
-            if (maxTopHeight <= minTopHeight) {
-                maxTopHeight = containerHeight * 0.5;
+            // Simulate aggressive flapping
+            for (let f = 0; f < frames; f++) {
+                if (f % flapInterval === 0) v = jumpPower;
+                v += gravity;
+                v = Math.min(v, maxVelocity);
+                y += v;
+                maxClimb = Math.min(maxClimb, y);
             }
             
-            let pipeHeight = Math.random() * (maxTopHeight - minTopHeight) + minTopHeight;
+            // Simulate falling
+            y = 0; v = 0;
+            for (let f = 0; f < frames; f++) {
+                v += gravity;
+                v = Math.min(v, maxVelocity);
+                y += v;
+                maxFall = Math.max(maxFall, y);
+            }
+            
+            return {maxClimb: Math.abs(maxClimb), maxFall: maxFall};
+        }
+
+        // Create pipe with safe opening
+        function createPipe(xOffset = 0) {
+            let minTopHeight = 100;
+            let minBottomHeight = 100;
+            
+            const opening = pipeGap;
+            let safeOpen = getBirdMaxClimbOrFallPerPipe();
+            
+            let minCenter = minTopHeight + opening / 2;
+            let maxCenter = containerHeight - minBottomHeight - opening / 2;
+            
+            let openingCenter;
+            if (lastOpeningCenter === null) {
+                openingCenter = Math.random() * (maxCenter - minCenter) + minCenter;
+            } else {
+                let lowerBound = Math.max(minCenter, lastOpeningCenter - safeOpen.maxClimb);
+                let upperBound = Math.min(maxCenter, lastOpeningCenter + safeOpen.maxFall);
+                openingCenter = Math.random() * (upperBound - lowerBound) + lowerBound;
+            }
+            lastOpeningCenter = openingCenter;
+            
+            let pipeHeight = openingCenter - opening / 2;
+            let bottomPipeY = openingCenter + opening / 2;
+            let bottomPipeHeight = containerHeight - bottomPipeY;
             
             let pipeContainer = document.createElement('div');
             pipeContainer.style.position = 'absolute';
-            pipeContainer.style.left = containerWidth + 'px';
+            pipeContainer.style.left = (containerWidth + xOffset) + 'px';
             pipeContainer.style.zIndex = '70';
             
-            // TOP PIPE
+            // Top pipe
             let topPipeBody = document.createElement('div');
             topPipeBody.className = 'pipe-body';
             topPipeBody.style.width = PIPE_WIDTH + 'px';
@@ -946,10 +970,7 @@
             topPipeCap.style.left = -PIPE_CAP_OFFSET + 'px';
             topPipeCap.style.top = (pipeHeight - PIPE_CAP_HEIGHT) + 'px';
             
-            // BOTTOM PIPE
-            let bottomPipeY = pipeHeight + pipeGap;
-            let bottomPipeHeight = containerHeight - bottomPipeY;
-            
+            // Bottom pipe
             let bottomPipeBody = document.createElement('div');
             bottomPipeBody.className = 'pipe-body';
             bottomPipeBody.style.width = PIPE_WIDTH + 'px';
@@ -973,7 +994,7 @@
             pipes.push({
                 container: pipeContainer,
                 passed: false,
-                x: containerWidth,
+                x: containerWidth + xOffset,
                 topHeight: pipeHeight,
                 bottomY: bottomPipeY
             });
@@ -991,7 +1012,7 @@
             return distanceSquared < (radius * radius);
         }
 
-        // Check collision with circular hitbox
+        // Check collision
         function checkCollision() {
             let birdCenterX = containerWidth * 0.15 + BIRD_HITBOX_OFFSET_X + BIRD_RADIUS;
             let birdCenterY = birdY + BIRD_HITBOX_OFFSET_Y + BIRD_RADIUS;
@@ -1092,9 +1113,9 @@
             
             updateEnvironment(currentTime);
             
-            if (currentTime - lastPipeTime > pipeInterval) {
+            let rightmostPipeX = pipes.length > 0 ? Math.max(...pipes.map(p => p.x)) : 0;
+            if (rightmostPipeX <= containerWidth - pipeSpacing) {
                 createPipe();
-                lastPipeTime = currentTime;
             }
             
             for (let i = pipes.length - 1; i >= 0; i--) {
@@ -1136,6 +1157,10 @@
         function startGame() {
             startScreen.style.display = 'none';
             gameRunning = true;
+            
+            pipes.forEach(pipe => pipe.container.remove());
+            pipes = [];
+            
             birdY = containerHeight / 2;
             velocity = 0;
             score = 0;
@@ -1143,8 +1168,6 @@
             bird.style.top = birdY + 'px';
             
             gameStartTime = performance.now();
-            lastPipeTime = gameStartTime;
-            lastEnvironmentUpdate = gameStartTime;
             
             currentSeason = 'summer';
             currentTimeOfDay = 'day';
@@ -1161,7 +1184,10 @@
             clearTimeout(weatherEndTimeout);
             clearInterval(lightningInterval);
             
-            // Schedule first weather event
+            lastOpeningCenter = null;
+            createPipe(0);
+            createPipe(pipeSpacing);
+            
             weatherTimeout = setTimeout(() => {
                 if (gameRunning) {
                     startWeatherEvent();
@@ -1219,7 +1245,8 @@
         window.addEventListener('resize', () => {
             containerWidth = gameContainer.offsetWidth;
             containerHeight = gameContainer.offsetHeight;
-            pipeSpeed = containerWidth * 0.0045;
+            pipeSpeed = containerWidth * 0.0035;
+            pipeSpacing = Math.floor(containerWidth * 0.45);
         });
 
         // Event listeners
