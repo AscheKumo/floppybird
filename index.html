@@ -604,12 +604,12 @@
         let containerWidth = gameContainer.offsetWidth;
         let containerHeight = gameContainer.offsetHeight;
 
-        // Bird physics
+        // Bird physics  
         let birdY = containerHeight / 2;
         let velocity = 0;
-        let gravity = 0.2;
-        let jumpPower = -5;
-        let maxVelocity = 8;
+        let gravity = 0.3;
+        let jumpPower = -4.2;
+        let maxVelocity = 4.5;
         let currentRotation = 0;
         
         // Game variables
@@ -726,9 +726,9 @@
         // Bird rotation based on velocity
         function updateBirdRotation() {
             let normalizedVelocity = velocity / maxVelocity;
-            let rotationFactor = Math.sign(normalizedVelocity) * Math.pow(Math.abs(normalizedVelocity), 0.7);
-            let rotation = -rotationFactor * 60;
-            rotation = Math.max(-50, Math.min(60, rotation));
+            let rotationFactor = Math.sign(normalizedVelocity) * Math.pow(Math.abs(normalizedVelocity), 0.6);
+            let rotation = -rotationFactor * 45;
+            rotation = Math.max(-35, Math.min(45, rotation));
             currentRotation = rotation;
             bird.style.transform = `scaleX(-1) rotate(${rotation}deg)`;
         }
@@ -1162,7 +1162,7 @@
             pipes = [];
             
             birdY = containerHeight / 2;
-            velocity = 0;
+            velocity = 0; // Start without initial velocity
             score = 0;
             scoreElement.textContent = score;
             bird.style.top = birdY + 'px';
